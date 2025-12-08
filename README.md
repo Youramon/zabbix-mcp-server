@@ -16,6 +16,7 @@ A comprehensive Model Context Protocol (MCP) server for Zabbix integration using
 - `host_create` - Create new hosts with interfaces and templates
 - `host_update` - Update existing host configurations
 - `host_delete` - Remove hosts from monitoring
+- `hostinterfaces_get` - Retrieve host interfaces with advanced filtering
 
 ### 👥 Host Group Management
 - `hostgroup_get` - Retrieve host groups
@@ -28,6 +29,7 @@ A comprehensive Model Context Protocol (MCP) server for Zabbix integration using
 - `item_create` - Create new monitoring items
 - `item_update` - Update existing items
 - `item_delete` - Remove monitoring items
+- `item_get_current_status` - Get current status and last value of monitoring items
 
 ### ⚠️ Trigger Management
 - `trigger_get` - Retrieve triggers and alerts

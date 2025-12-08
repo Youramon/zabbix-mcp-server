@@ -118,6 +118,7 @@ def host_get(hostids: Optional[List[str]] = None,
              output: Union[str, List[str]] = "extend",
              search: Optional[Dict[str, str]] = None,
              filter: Optional[Dict[str, Any]] = None,
+             severities: Optional[List[int]] = None,
              limit: Optional[int] = None) -> str:
     """Get hosts from Zabbix with optional filtering.
     
@@ -128,6 +129,7 @@ def host_get(hostids: Optional[List[str]] = None,
         output: Output format (extend or list of specific fields)
         search: Search criteria
         filter: Filter criteria
+        severities: Return hosts that have only problems with given severities. Applies only if problem object is trigger.
         limit: Maximum number of results
         
     Returns:
@@ -148,6 +150,8 @@ def host_get(hostids: Optional[List[str]] = None,
         params["filter"] = filter
     if limit:
         params["limit"] = limit
+    if severities:
+        params["severities"] = severities
     
     result = client.host.get(**params)
     return format_response(result)
@@ -458,6 +462,50 @@ def item_delete(itemids: List[str]) -> str:
     result = client.item.delete(*itemids)
     return format_response(result)
 
+@mcp.tool()
+def item_get_curent_status(itemids: Optional[List[str]] = None,
+                           hostids: Optional[List[str]] = None,
+                           groupids: Optional[List[str]] = None,
+                           templateids: Optional[List[str]] = None,
+                           search: Optional[Dict[str, str]] = None,
+                           filter: Optional[Dict[str, Any]] = None,
+                           limit: Optional[int] = None) -> str:
+    """Get current status of items from Zabbix with optional filtering.
+    
+    Args:
+        itemids: List of item IDs to retrieve
+        hostids: List of host IDs to filter by
+        groupids: List of host group IDs to filter by
+        templateids: List of template IDs to filter by
+        output: Output format
+        search: Search criteria
+        filter: Filter criteria
+        limit: Maximum number of results
+        
+    Returns:
+        str: JSON formatted list of items with their current status, name, id and status
+    """
+    client = get_zabbix_client()
+    output: List[str] = ["itemid", "name", "status", "lastvalue"],
+    params = {"output": output}
+    
+    if itemids:
+        params["itemids"] = itemids
+    if hostids:
+        params["hostids"] = hostids
+    if groupids:
+        params["groupids"] = groupids
+    if templateids:
+        params["templateids"] = templateids
+    if search:
+        params["search"] = search
+    if filter:
+        params["filter"] = filter
+    if limit:
+        params["limit"] = limit
+    
+    result = client.item.get(**params)
+    return format_response(result)
 
 # TRIGGER MANAGEMENT
 @mcp.tool()
@@ -1522,7 +1570,35 @@ def get_transport_config() -> Dict[str, Any]:
         logger.info(f"HTTP transport configured: {config['host']}:{config['port']}, stateless_http={config['stateless_http']}")
     
     return config
+# HOSTINTERFACE MANAGEMENT
+@mcp.tool()
+def hostinterfaces_get(hostids: List[int] = None,
+                       search: Dict[str,str] = None,
+                       output: List[str] = None) -> str:
+    """Get a host interface from Zabbix with the associated host. This includes information like IP address, DNS name, and port.
 
+    Args:
+        hostids: List of Host IDs to retrieve interfaces for
+        search: Search criteria for host interfaces. This is a dictionary where the key is the field name and the value is the search term for that field. Do not use if not needed.
+        output: List of fields to return. If not specified, all fields will be returned.
+    Returns:
+        str: JSON formatted list of host interfaces
+    """
+    client = get_zabbix_client()
+    params = {}
+
+    if hostids:
+        params["hostids"] = hostids
+    if search:
+        params["search"] = search
+    if output:
+        params["output"] = output
+
+    result = client.hostinterface.get(**params)
+    return format_response(result)
+
+
+# MAIN ENTRY POINTs
 
 def main():
     """Main entry point for uv execution."""
