@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Union
 from fastmcp import FastMCP
 from zabbix_utils import ZabbixAPI
 from dotenv import load_dotenv
+from helpers import fastmcp_patch
 
 # Load environment variables from .env file
 load_dotenv()
